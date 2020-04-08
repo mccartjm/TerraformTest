@@ -1,2 +1,4 @@
 # TerraformTest
-Demo of how to use terraform for AWS
+Demo of how to use terraform for AW
+test :wq
+S
