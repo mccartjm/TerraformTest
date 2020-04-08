@@ -10,3 +10,7 @@ cidrs = {
     rds2 = 10.0.6.0/24
     rds3 = 10.0.7.0/24
 }
+
+#curl canhazip.com
+localip = "your local ip/32"
+domain_name = "your purchased domain name without .com"

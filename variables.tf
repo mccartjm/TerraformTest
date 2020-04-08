@@ -1,4 +1,4 @@
-variable "aws_retion" {}
+variable "aws_region" {}
 variable "aws_profile" {}
 variable "vpc_cidr" {}
 
@@ -8,3 +8,7 @@ data "aws_available_zones" "available" {}
 variable "cidrs" {
     type = "map"
 }
+
+variable "localip" {}
+
+variable "doman_name" {}

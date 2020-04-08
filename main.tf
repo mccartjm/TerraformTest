@@ -213,3 +213,151 @@ resource "aws_route_table_association" "wp_private2_assoc" {
   route_table_id  = "${aws_default_route_table.wp_public_rt.id}"
 }
 
+# Securtiy Groups
+
+resource "aws_security_group" "wp_dev_sg" {
+  name = "wp_dev_sg"
+  description = "Used for access to the dev instance"
+  vpc_id = "${aws_vpc.wp_vpc.id}"
+
+  #SSH
+
+  ingress {
+    from_port = 22
+    to_port = 22
+    protocol = "tcp"
+    cidr_blocks = ["${var.localip}"]
+  }
+
+  #HTTP
+
+  ingress {
+    from_port = 80
+    to_port = 80
+    protocol = "tcp"
+    cidr_blocks = ["${var.localip}"]
+  }
+
+  #this is open to everything, probably shouldn't do this
+  egress {
+    from_port = 0
+    to_port = 0
+    protocol = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+#Public security group
+
+resource "aws_security_group" "wp_public_sg" {
+  name = "wp_public_sg"
+  description = "Used for the elastic LB for public access"
+  vpc_id = "${aws_vpc.wp_vpc.id}"
+
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }  
+}
+
+#Private Security Group
+resource "aws_security_group" "wp_private_sg" {
+  name        = "wp_private_sg"
+  description = "Used for private instances"
+  vpc_id      = "${aws_vpc.wp_vpc.id}"
+
+  #Access from VPC
+
+  ingress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["${var.vpc_cidr}"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }  
+}
+
+#RDS Security Group
+
+resource "aws_security_group" "wp_rds_sg" {
+  name        = "wp_rds_sg"
+  description = "Used for RDS instances"
+  vpc_id      = "${aws_vpc.wp_vpc.id}"
+
+  #SQL access from public/private security groups
+  
+  ingress {
+    from_port = 3306
+    to_port   = 3306
+    protocol  = "tcp"
+    security_groups = [
+      "${aws_security_group.wp_dev_sg.id}",
+      "${aws_security_group.wp_public_sg.id}",
+      "${aws_security_group.wp_private_sg.id}"
+    ]
+  }
+}
+
+#VPC Endpoint for S3
+
+resource "aws_vpc_endpoint" "wp_private-s3_endpoint" {
+  vpc_id        = "${aws_vpc.wp_vpc}"
+  service_name  = "com.amazonaws.${var.aws_region}.s3"
+
+  route_table_ids = [
+    "${aws_vpc.wp_vpc.main_route_table_id}",
+    "${aws_route_table.wp_public_rt.id}"
+  ]
+
+  policy = <<POLICY
+{
+    "Statement": [
+      {
+        "Action": "*",
+        "Effect": "Allow",
+        "Resource": "*",
+        "Principal": "*"
+      }
+    ]
+}
+POLICY
+}
+
+#------- S3 code bucket --------
+
+#Randomly generates an id for your S3 bucket (this name must be unique accross all buckets everywhere in every account)
+
+#this also needs a plugin install.  its using plugin called random to generate a random id.  to install plugin, run terraform init
+resource "random_id" "wp_code_bucket" {
+  byte_length = 2
+}
+
+resource "aws_s3_bucket" "code" {
+  bucket  = "${var.domain_name}-${random_id.wp_code_bucket.dec}"
+  acl     = "private"
+  #allows you to destroy bucket, in AWS this defaults to not being able to delete
+  force_destroy = true
+
+  tags {
+    name  = "code bucket"
+  }
+}
+
+#section in LA is Creating RDS Instance
+
+
