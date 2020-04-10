@@ -24,3 +24,8 @@ dev_instance_type = "t2.micro"
 dev_ami = "ami-b73b63a0"
 public_key_path = "/root/.ssh/<id.pub>"
 key_name = "<key_name>"
+
+elb_healthy_threshold = "2"
+elb_unhealthy_threshold = "3"
+elb_timeout = "3"
+elb_interval = "30"
