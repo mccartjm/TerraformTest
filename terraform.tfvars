@@ -19,3 +19,8 @@ db_instance_class = "db.t2.micro"
 dbname = "superherodb"
 dbuser = "superhero"
 dbpassword = "superheropass"
+
+dev_instance_type = "t2.micro"
+dev_ami = "ami-b73b63a0"
+public_key_path = "/root/.ssh/<id.pub>"
+key_name = "<key_name>"
