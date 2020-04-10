@@ -14,3 +14,8 @@ cidrs = {
 #curl canhazip.com
 localip = "your local ip/32"
 domain_name = "your purchased domain name without .com"
+
+db_instance_class = "db.t2.micro"
+dbname = "superherodb"
+dbuser = "superhero"
+dbpassword = "superheropass"

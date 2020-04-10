@@ -12,3 +12,11 @@ variable "cidrs" {
 variable "localip" {}
 
 variable "doman_name" {}
+
+variable "db_instance_class" {}
+
+variable "dbname" {}
+
+variable "dbuser" {}
+
+variable "dbpassword" {}
