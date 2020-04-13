@@ -1,4 +1,4 @@
 # TerraformTest
-Demo of how to use terraform for AW
-test :wq
-S
+ All Providers are pulled in through the main.tf file
+ All resources are pulled in with the variables.tf file
+ 
